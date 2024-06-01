@@ -4,7 +4,13 @@ import cors from "cors";
 import morgan from "morgan";
 import { initSocketServer } from "./utils";
 import { IP_SERVER, PORT } from "./constants";
-import { authRoutes, userRoutes } from "./routes";
+import {
+  authRoutes,
+  chatMessageRoutes,
+  chatRouter,
+  groupRoutes,
+  userRoutes,
+} from "./routes";
 
 const corsOptions = {
   origin: [`http://${IP_SERVER}:${PORT}`],
@@ -24,5 +30,8 @@ app.use(morgan("dev"));
 
 app.use("/", authRoutes);
 app.use("/", userRoutes);
+app.use("/", chatRouter);
+app.use("/", chatMessageRoutes);
+app.use("/", groupRoutes);
 
 export { server };
