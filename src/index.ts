@@ -4,7 +4,6 @@ import { PORT, IP_SERVER, DB_USER, DB_HOST, DB_PASSWORD } from "./constants";
 import { io } from "./utils";
 
 const mongooseUrl: string = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_HOST}`;
-
 async function startServer() {
   try {
     await mongoose.connect(mongooseUrl);
