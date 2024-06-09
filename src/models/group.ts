@@ -5,12 +5,12 @@ const GroupSchema = new Schema({
   image: String,
   creator: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "user",
   },
   participants: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "user",
     },
   ],
 });

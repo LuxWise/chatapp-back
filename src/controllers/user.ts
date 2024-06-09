@@ -67,7 +67,6 @@ const updateUser = async (req: modifyRequest, res: Response) => {
     if (!response) {
       res.status(400).send("user undefind");
     } else {
-      console.log(userData);
       res.status(200).send(userData);
     }
   } catch {

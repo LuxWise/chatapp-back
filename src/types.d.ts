@@ -20,6 +20,10 @@ export interface modifyRequest extends Request {
   file?: Express.Multer.File;
 }
 
+export interface group {
+  name: string;
+}
+
 export interface chat {
   _doc: any;
 }

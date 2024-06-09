@@ -16,21 +16,26 @@ const upload = multer({ storage });
 
 const api = express.Router();
 
-api.get("/group", middleware.asureAuth, groupController.create);
-api.get("/group/:id", middleware.asureAuth, groupController.create);
+api.get("/group", middleware.asureAuth, groupController.getAll);
+api.get("/group/:id", middleware.asureAuth, groupController.getGroup);
 api.post(
   "/group",
   middleware.asureAuth,
   upload.single("image"),
   groupController.create
 );
-api.patch("/group/exit/:id", middleware.asureAuth, groupController.create);
 api.patch(
   "/group/add_participants/:id",
   middleware.asureAuth,
-  groupController.create
+  groupController.addParticipants
 );
 api.patch("/group/ban", middleware.asureAuth, groupController.create);
-api.patch("/group/:id", middleware.asureAuth, groupController.create);
+api.patch(
+  "/group/:id",
+  middleware.asureAuth,
+  upload.single("image"),
+  groupController.updateGroup
+);
+api.patch("/group/exit/:id", middleware.asureAuth, groupController.exitGroup);
 
 export const groupRoutes = api;
