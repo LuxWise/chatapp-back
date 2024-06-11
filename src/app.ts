@@ -8,6 +8,7 @@ import {
   authRoutes,
   chatMessageRoutes,
   chatRouter,
+  groupMessageRoutes,
   groupRoutes,
   userRoutes,
 } from "./routes";
@@ -33,5 +34,6 @@ app.use("/", userRoutes);
 app.use("/", chatRouter);
 app.use("/", chatMessageRoutes);
 app.use("/", groupRoutes);
+app.use("/", groupMessageRoutes);
 
 export { server };

@@ -1,4 +1,4 @@
-import { ChatMessage } from "../models";
+import { GroupMessage } from "../models";
 import { Response } from "express";
 import { modifyRequest } from "../types";
 import { getFilePath, io } from "../utils";
@@ -6,28 +6,30 @@ import { getFilePath, io } from "../utils";
 const sendText = async (req: modifyRequest, res: Response) => {
   try {
     if (!req.userData) throw new Error();
-
-    const { chatId, message } = req.body;
+    const { groupId, message } = req.body;
     const { id } = req.userData;
 
-    const chatMessage = new ChatMessage({
-      chat: chatId,
+    if (!groupId || !message) throw new Error("infomation is undefined");
+
+    const groupMessage = new GroupMessage({
+      group: groupId,
       user: id,
-      message,
+      message: message,
       type: "TEXT",
     });
 
     try {
-      await chatMessage.save();
-      const data = await chatMessage.populate("user");
-      io?.sockets.in(chatId).emit("message", data);
-      io?.sockets.in(`${chatId}_notify`).emit("messageNotify", data);
+      await groupMessage.save();
+      const data = await groupMessage.populate("user");
+      io?.sockets.in(groupId).emit("message", data);
+      io?.sockets.in(`${groupId}_notify`).emit("messageNotify", data);
 
       res.status(201).send({});
     } catch (error) {
       res.status(500).send({ msg: "Error", error: error });
     }
-  } catch {
+  } catch (error) {
+    console.log(error);
     res.status(500).send("server error");
   }
 };
@@ -36,24 +38,24 @@ const sendImage = async (req: modifyRequest, res: Response) => {
   try {
     if (!req.userData) throw new Error();
 
-    const { chatId } = req.body;
+    const { groupId } = req.body;
     const { id } = req.userData;
     let filePath;
 
     if (req.file) filePath = getFilePath(req.file);
 
-    const chatMessage = new ChatMessage({
-      chat: chatId,
+    const groupMessage = new GroupMessage({
+      group: groupId,
       user: id,
       message: filePath,
       type: "IMAGE",
     });
 
     try {
-      await chatMessage.save();
-      const data = await chatMessage.populate("user");
-      io?.sockets.in(chatId).emit("message", data);
-      io?.sockets.in(`${chatId}_notify`).emit("messageNotify", data);
+      await groupMessage.save();
+      const data = await groupMessage.populate("user");
+      io?.sockets.in(groupId).emit("message", data);
+      io?.sockets.in(`${groupId}_notify`).emit("messageNotify", data);
 
       res.status(201).send({});
     } catch (error) {
@@ -68,13 +70,13 @@ const getAll = async (req: modifyRequest, res: Response) => {
   const { id } = req.params;
 
   try {
-    const message = await ChatMessage.find({ chat: id })
+    const message = await GroupMessage.find({ group: id })
       .sort({
         createAt: 1,
       })
       .populate("user");
 
-    const total = await ChatMessage.countDocuments({ chat: id });
+    const total = await GroupMessage.countDocuments({ chat: id });
 
     res.status(200).send({ message, total });
   } catch {
@@ -86,7 +88,7 @@ const getTotalMessage = async (req: modifyRequest, res: Response) => {
   const { id } = req.params;
 
   try {
-    const response = await ChatMessage.countDocuments({ chat: id });
+    const response = await GroupMessage.countDocuments({ chat: id });
     res.status(200).send(JSON.stringify(response));
   } catch (err) {
     console.log(err);
@@ -98,7 +100,7 @@ const getLastMessage = async (req: modifyRequest, res: Response) => {
   const { id } = req.params;
 
   try {
-    const response = await ChatMessage.findOne({ chat: id }).sort({
+    const response = await GroupMessage.findOne({ chat: id }).sort({
       createdAt: -1,
     });
     res.status(200).send(response || {});
@@ -107,7 +109,7 @@ const getLastMessage = async (req: modifyRequest, res: Response) => {
   }
 };
 
-export const chatMessageController = {
+export const groupMessageController = {
   sendText,
   sendImage,
   getAll,

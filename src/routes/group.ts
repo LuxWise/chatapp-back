@@ -29,7 +29,7 @@ api.patch(
   middleware.asureAuth,
   groupController.addParticipants
 );
-api.patch("/group/ban", middleware.asureAuth, groupController.create);
+api.patch("/group/ban", middleware.asureAuth, groupController.banParticipant);
 api.patch(
   "/group/:id",
   middleware.asureAuth,

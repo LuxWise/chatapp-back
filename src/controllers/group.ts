@@ -1,8 +1,8 @@
+import mongoose from "mongoose";
 import { Response } from "express";
 import { modifyRequest } from "../types";
-import { Group } from "../models/group";
+import { Group, GroupMessage } from "../models";
 import { getFilePath } from "../utils";
-import mongoose from "mongoose";
 import { User } from "../models";
 
 const getAll = async (req: modifyRequest, res: Response) => {
@@ -17,7 +17,20 @@ const getAll = async (req: modifyRequest, res: Response) => {
     if (!response) {
       res.status(400).send("Error getting participants");
     } else {
-      res.status(200).send(response);
+      const arrayGroups = [];
+      for await (const group of response) {
+        const groupObj = group.toObject();
+        const response = await GroupMessage.findOne({ group: group._id }).sort({
+          createAt: -1,
+        });
+
+        arrayGroups.push({
+          ...groupObj,
+          last_message_dat: response?.createdAt || null,
+        });
+      }
+
+      res.status(200).send(arrayGroups);
     }
   } catch (err) {
     console.log(err);
@@ -76,10 +89,7 @@ const updateGroup = async (req: modifyRequest, res: Response) => {
 
     const group = await Group.findById(id);
 
-    if (!group) {
-      res.status(404).send("Group not found");
-      return;
-    }
+    if (!group) throw new Error();
 
     if (name) group.name = name;
 
@@ -106,10 +116,7 @@ const addParticipants = async (req: modifyRequest, res: Response) => {
     const group = await Group.findById(id);
     const users = await User.find({ _id: usersId });
 
-    if (!group) {
-      res.status(404).send("Group not found");
-      return;
-    }
+    if (!group) throw new Error();
 
     if (!users) {
       res.status(404).send("Group not found");
@@ -119,7 +126,14 @@ const addParticipants = async (req: modifyRequest, res: Response) => {
     const arrayNewParticipants: mongoose.Types.ObjectId[] = [];
     users.map(user => arrayNewParticipants.push(user._id));
 
-    const allParticipants = [...group.participants, ...arrayNewParticipants];
+    const allParticipantsSet = new Set([
+      ...group.participants.map(id => id.toString()),
+      ...arrayNewParticipants.map(id => id.toString()),
+    ]);
+
+    const allParticipants = Array.from(allParticipantsSet).map(
+      id => new mongoose.Types.ObjectId(id)
+    );
 
     const updatedGroup = await Group.findByIdAndUpdate(
       id,
@@ -141,10 +155,7 @@ const exitGroup = async (req: modifyRequest, res: Response) => {
     const userId = req.userData.id;
     const group = await Group.findById(id);
 
-    if (!group) {
-      res.status(404).send("Group not found");
-      return;
-    }
+    if (!group) throw new Error();
 
     const updatedParticipants = group.participants.filter(
       participant => participant.toString() !== userId
@@ -167,6 +178,36 @@ const exitGroup = async (req: modifyRequest, res: Response) => {
   }
 };
 
+const banParticipant = async (req: modifyRequest, res: Response) => {
+  try {
+    const { groupId, userId } = req.body;
+    console.log(groupId, userId);
+    const group = await Group.findById(groupId);
+
+    if (!group) throw new Error();
+
+    const updatedParticipants = group.participants.filter(
+      participant => participant.toString() !== userId
+    );
+
+    const updatedGroup = await Group.findByIdAndUpdate(
+      groupId,
+      { $set: { participants: updatedParticipants } },
+      { new: true }
+    );
+
+    if (!updatedGroup) {
+      res.status(404).send("Error updating group");
+      return;
+    }
+
+    res.status(200).send({ msg: "ban success" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("server error");
+  }
+};
+
 export const groupController = {
   getAll,
   getGroup,
@@ -174,4 +215,5 @@ export const groupController = {
   updateGroup,
   addParticipants,
   exitGroup,
+  banParticipant,
 };

@@ -15,7 +15,7 @@ const getAll = async (req: modifyRequest, res: Response) => {
       .populate("participantTwo");
 
     if (!response) {
-      res.status(400).send("error al encontrar los chats");
+      res.status(400).send("error to find chats");
     } else {
       const arrayChats = [];
       for await (const chat of response) {
