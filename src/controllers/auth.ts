@@ -9,10 +9,11 @@ const register = async (
   req: Request<{}, {}, registerEntry>,
   res: Response
 ): Promise<void> => {
-  const { email, password } = req.body;
+  const { email, username, password } = req.body;
 
   const user = new User({
     email: email.toLowerCase(),
+    username: username,
   });
 
   const salt = bcript.genSaltSync(10);

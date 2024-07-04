@@ -2,6 +2,7 @@ import { Request } from "express";
 
 export interface registerEntry {
   email: string;
+  username: string;
   password: string;
 }
 
