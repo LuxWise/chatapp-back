@@ -15,6 +15,10 @@ async function startServer() {
       io?.sockets.on("connection", socket => {
         console.log("NEW USER CONNECT");
 
+        socket.on("disconnect", () => {
+          console.log("USER DISCONNECTED");
+        });
+
         socket.on("join", room => {
           socket.join(room);
           console.log("USER JOIN");
@@ -23,10 +27,6 @@ async function startServer() {
         socket.on("leave", room => {
           socket.leave(room);
           console.log("USER LEFT");
-        });
-
-        socket.on("DISCONNECT", () => {
-          console.log("USER DISCONNECT");
         });
       });
     });

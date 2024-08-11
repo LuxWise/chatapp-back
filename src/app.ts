@@ -25,7 +25,7 @@ const server = http.createServer(app);
 initSocketServer(server);
 
 app.use(express.json());
-app.use(express.static("uploads"));
+app.use(express.static("src/uploads"));
 app.use(cors(corsOptions));
 app.use(morgan("dev"));
 
