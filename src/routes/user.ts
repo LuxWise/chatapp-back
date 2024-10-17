@@ -17,7 +17,7 @@ const upload = multer({ storage });
 const api = express.Router();
 
 api.get("/user/me", middleware.asureAuth, userController.getMe);
-api.get("/user", middleware.asureAuth, userController.getUsers);
+api.get("/users", middleware.asureAuth, userController.getUsers);
 api.get("/user/:id", middleware.asureAuth, userController.getUser);
 api.patch(
   "/user/me",
